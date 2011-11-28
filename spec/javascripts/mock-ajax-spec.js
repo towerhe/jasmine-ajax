@@ -37,14 +37,14 @@ describe("jasmine.Ajax", function() {
     describe("when using jQuery", function() {
 
       it("installs the mock", function() {
-        withoutPrototype(function() {
+        without(['Ext', 'Prototype'], function() {
           jasmine.Ajax.installMock();
           expect(jQuery.ajaxSettings.xhr).toBe(jasmine.Ajax.jQueryMock);
         });
       });
 
       it("saves a reference to jQuery.ajaxSettings.xhr", function() {
-        withoutPrototype(function() {
+        without(['Ext', 'Prototype'], function() {
           var jqueryAjax = jQuery.ajaxSettings.xhr;
           jasmine.Ajax.installMock();
           expect(jasmine.Ajax.real).toBe(jqueryAjax);
@@ -52,7 +52,7 @@ describe("jasmine.Ajax", function() {
       });
 
       it("sets mode to 'jQuery'", function() {
-        withoutPrototype(function() {
+        without(['Ext', 'Prototype'], function() {
           jasmine.Ajax.installMock();
           expect(jasmine.Ajax.mode).toEqual("jQuery");
         });
@@ -61,14 +61,14 @@ describe("jasmine.Ajax", function() {
 
     describe("when using Prototype", function() {
       it("installs the mock", function() {
-        withoutJquery(function() {
+        without(['jQuery', 'Ext'], function() {
           jasmine.Ajax.installMock();
           expect(Ajax.getTransport).toBe(jasmine.Ajax.prototypeMock);
         });
       });
 
       it("stores a reference to Ajax.getTransport", function() {
-        withoutJquery(function(){
+        without(['jQuery', 'Ext'], function() {
           var prototypeAjax = Ajax.getTransport;
 
           jasmine.Ajax.installMock();
@@ -77,24 +77,44 @@ describe("jasmine.Ajax", function() {
       });
 
       it("sets mode to 'Prototype'", function() {
-        withoutJquery(function() {
+        without(['jQuery', 'Ext'], function() {
           jasmine.Ajax.installMock();
           expect(jasmine.Ajax.mode).toEqual("Prototype");
         });
       });
     });
 
+    describe("when using SenchaTouch", function() {
+      it("installs the mock", function() {
+        without(['jQuery', 'Prototype'], function() {
+          jasmine.Ajax.installMock();
+          expect(Ajax.getTransport).toBe(jasmine.Ajax.prototypeMock);
+        });
+      });
+
+      it("stores a reference to Ext.data.Connection.prototype.getXhrInstance", function() {
+        without(['jQuery', 'Prototype'], function() {
+          var extAjax = Ext.data.Connection.prototype.getXhrInstance;
+
+          jasmine.Ajax.installMock();
+          expect(jasmine.Ajax.real).toBe(extAjax);
+        });
+      });
+
+      it("sets mode to 'SenchaTouch'", function() {
+        without(['jQuery', 'Prototype'], function() {
+          jasmine.Ajax.installMock();
+          expect(jasmine.Ajax.mode).toEqual("SenchaTouch");
+        });
+      });
+    });
+
+
     describe("when using any other library", function() {
       it("raises an exception", function() {
-        var jquery = jQuery;
-        var prototype = Prototype;
-        jQuery = undefined;
-        Prototype = undefined;
-
-        expect(function(){ jasmine.Ajax.installMock() }).toThrow("jasmine.Ajax currently only supports jQuery and Prototype");
-
-        jQuery = jquery;
-        Prototype = prototype;
+        without(['jQuery', 'Prototype', 'Ext'], function() {
+          expect(function(){ jasmine.Ajax.installMock() }).toThrow("jasmine.Ajax currently only supports jQuery and Prototype");
+        });
       });
     });
 
@@ -108,7 +128,7 @@ describe("jasmine.Ajax", function() {
   describe("uninstallMock", function() {
     describe("when using jQuery", function() {
       it("returns ajax control to jQuery", function() {
-        withoutPrototype(function() {
+        without(['Prototype', 'Ext'], function() {
           var jqueryAjax = jQuery.ajaxSettings.xhr;
 
           jasmine.Ajax.installMock();
@@ -124,7 +144,7 @@ describe("jasmine.Ajax", function() {
 
     describe("when using Prototype", function() {
       it("returns Ajax control to Ajax.getTransport", function() {
-        withoutJquery(function() {
+        without(['jQuery', 'Ext'], function() {
           var prototypeAjax = Ajax.getTransport;
           jasmine.Ajax.installMock();
           jasmine.Ajax.uninstallMock();
@@ -177,6 +197,19 @@ describe("jasmine.Ajax", function() {
   });
 
 });
+
+function without(libs, spec) {
+  var libRefs = {};
+
+  for(var i = 0; i < libs.length; i++) {
+    libRefs[libs[i]] = eval(libs[i]);
+    eval(libs[i] + " = undefined;");
+  }
+  spec.apply(this);
+  for(var lib in libRefs) {
+    eval(lib + " = libRefs[lib];");
+  }
+}
 
 function withoutJquery(spec) {
   var jqueryRef = jQuery;
