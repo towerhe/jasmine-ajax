@@ -3,6 +3,7 @@ src_dir: .
 src_files:
     - frameworks/prototype.js
     - frameworks/jquery.js
+    - frameworks/sencha-touch.js
     - lib/mock-ajax.js
 
 spec_dir:
