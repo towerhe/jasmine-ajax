@@ -2,9 +2,11 @@ describe("Jasmine Mock Ajax (for Prototype.js)", function() {
   var request, anotherRequest, onSuccess, onFailure, onComplete;
   var sharedContext = {};
   var jquery = jQuery;
+  var ext = Ext;
 
   beforeEach(function() {
     jQuery = undefined;
+    Ext = undefined;
     jasmine.Ajax.useMock();
 
     onSuccess = jasmine.createSpy("onSuccess");
@@ -14,6 +16,7 @@ describe("Jasmine Mock Ajax (for Prototype.js)", function() {
 
   afterEach(function() {
     jQuery = jquery;
+    Ext = ext;
   });
 
   describe("when making a request", function () {
